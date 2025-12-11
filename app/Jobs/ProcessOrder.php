@@ -18,7 +18,9 @@ class ProcessOrder implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct()
+    public function __construct(
+        public Application $application
+    )
     {
         //
     }
@@ -28,17 +30,13 @@ class ProcessOrder implements ShouldQueue
      */
     public function handle(): void
     {
-        $service = new B2bService();
-        $applicationOrders = Application::orderReady();
-        if ($applicationOrders->count()) {
-            foreach ($applicationOrders->get() as $application) {
-                try {
-                    $service->submitApplication($application);
-                    Log::info("Application order successfully process.", $application);
-                } catch (\Exception $e) {
-                   Log::info("Application order process failed. " . $e->getMessage());
-                }
-            }
+        try {
+            $service = new B2bService();
+            $service->submitApplication($this->application);
+
+            Log::info("Application order successfully process.");
+        } catch (\Exception $e) {
+            Log::info("Application order process failed. " . $e->getMessage());
         }
     }
 }

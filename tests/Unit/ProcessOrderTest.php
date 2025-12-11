@@ -3,7 +3,9 @@
 namespace Tests\Unit;
 
 use App\Jobs\ProcessOrder;
+use App\Models\Application;
 use Carbon\Carbon;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Queue;
@@ -11,6 +13,8 @@ use Tests\TestCase;
 
 class ProcessOrderTest extends TestCase
 {
+    use RefreshDatabase;
+
     /**
      * A basic unit test to test job being pushed on queue.
      */
@@ -20,25 +24,30 @@ class ProcessOrderTest extends TestCase
         Queue::fake([
             ProcessOrder::class
         ]);
-
-        dispatch(new ProcessOrder);
+        $application = Application::factory()->create();
+        dispatch(new ProcessOrder($application));
 
         Queue::assertPushed(ProcessOrder::class, 1);
     }
 
-    public function test_scheduled_job_is_dispatched(): void
+    /**
+     * A basic unit test to dispatch job using command.
+     */
+    public function test_run_job_through_command(): void
     {
         // set up fake
         Bus::fake();
 
-        // set up timing
-        $timeToRun = Carbon::now()->addMinutes(5);
-        Carbon::setTestNow($timeToRun);
+        // set up data
+        $numOfApplications = 5;
+        Application::factory($numOfApplications)
+            ->nbnPlan()
+            ->create(['status' => 'order']);
 
         // run task scheduler
-        Artisan::call('schedule:run');
+        Artisan::call('app:process-order');
 
         Bus::assertDispatched(ProcessOrder::class);
-        Bus::assertDispatchedTimes(ProcessOrder::class, 1);
+        Bus::assertDispatchedTimes(ProcessOrder::class, $numOfApplications);
     }
 }
