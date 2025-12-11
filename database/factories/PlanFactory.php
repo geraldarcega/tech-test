@@ -22,4 +22,13 @@ class PlanFactory extends Factory
             'monthly_cost' => $this->faker->numerify('####'),
         ];
     }
+
+    public function nbnPlan(): Factory
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'type' => 'nbn',
+            ];
+        });
+    }
 }

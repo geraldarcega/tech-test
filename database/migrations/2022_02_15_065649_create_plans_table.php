@@ -16,7 +16,7 @@ return new class extends Migration {
             $table->id();
             $table->string('name');
             $table->string('type');
-            $table->integer('monthly_cost');
+            $table->decimal('monthly_cost', 10, 2, true);
             $table->timestamps();
         });
     }

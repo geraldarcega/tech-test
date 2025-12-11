@@ -31,4 +31,13 @@ class ApplicationFactory extends Factory
             'order_id' => null,
         ];
     }
+
+    public function nbnPlan(): Factory
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'plan_id' => Plan::factory()->nbnPlan(),
+            ];
+        });
+    }
 }
