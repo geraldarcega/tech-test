@@ -18,13 +18,16 @@ class ApplicationController extends Controller
      */
     public function __invoke(Request $request): ResourceCollection
     {
+        $request->validate([
+            'plan_type' => ['nullable', 'in:nbn, opticomm, mobile']
+        ]);
         $applications = Application::join('customers', 'applications.customer_id', '=', 'customers.id')
             ->join('plans', 'plans.id', '=', 'applications.plan_id');
 
         if ($request->has('plan_type')) {
             $applications = $applications->where('plans.type', $request->get('plan_type'));
         }
-        $collection = $applications->orderBy('id', 'desc')->paginate($this->perPage);
+        $collection = $applications->orderBy('created_at', 'asc')->paginate($this->perPage);
 
         return ApplicationResource::collection($collection);
     }
